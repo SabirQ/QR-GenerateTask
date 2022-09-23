@@ -61,30 +61,53 @@ namespace QRGenerateTask.Controllers
                     Console.WriteLine("Respones are not successfull,Request has been sent again");
                     goto Request;
                 }
+                TempData["Upload"] = "Succesfully Uploaded";
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine("Host is not available,please try again later");
+                TempData["Upload"] = "Host is not available,please try again later";
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                TempData["Upload"] = ex.Message.ToString();
             }
-            return Ok("Successfully Uploaded");
+            
+            return RedirectToAction("Index");
         }
-        public async Task<IActionResult> Generate()
+        public async Task<IActionResult> Generate(string search=null)
         {
-            List<VCard> vCards =await _context.VCards.ToListAsync();
+            List<VCard> vCards =new List<VCard>();
+            if (search==null)
+            {
+                vCards = await _context.VCards.ToListAsync();
+            }
+            else
+            {
+                vCards = await _context.VCards.Where(x=>x.Firstname.ToLower().Contains(search.ToLower()) 
+                || x.Lastname.ToLower().Contains(search.ToLower())
+                || x.Email.Contains(search.ToLower()) || x.Phone.Contains(search)|| x.Country.ToLower().Contains(search.ToLower())
+                || x.City.ToLower().Contains(search.ToLower())).ToListAsync();
+            }
+            
             if (vCards == null) return NotFound();
             foreach (var card in vCards)
             {
-                if (card.ExistQRPath==null)
+                if (card.ExistQRPath == null)
                 {
-                    GeneratedBarcode Qrcode = IronBarCode.QRCodeWriter.CreateQrCode($"{_env.WebRootPath}/img/");
-                    Qrcode.SaveAsPng($"{card.Id}.png");
-                    card.ExistQRPath = $"~/img/{card.Id}.png";
-                }
-            }
+                    GeneratedBarcode Qrcode = QRCodeWriter.CreateQrCode($"" +
+                        $"BEGIN:VCARD" +
+                        $"\nN: {card.Lastname}; {card.Firstname}; ; Mr." +
+                        $"\nFN:{card.Lastname} {card.Firstname}" +
+                        $"\nTEL: {card.Phone}" +
+                        $"\nCOUNTRY:{card.Country}" +
+                        $"\nCITY:{card.City}" +
+                        $"\nEMAIL:{card.Email}" +
+                        $"\nEND:VCARD",500, QRCodeWriter.QrErrorCorrectionLevel.Low);
+
+                    Qrcode.SaveAsPng($"{_env.WebRootPath}/img/{card.Id}.png");
+                    card.ExistQRPath = $"/img/{card.Id}.png";
+                 }
+        }
             await _context.SaveChangesAsync();
             return View(vCards);
         }

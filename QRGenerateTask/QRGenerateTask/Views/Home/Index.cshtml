@@ -1,8 +1,6 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Main Menu";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h3>@TempData["Upload"]</h3>
+<a asp-action="Upload" asp-controller="Home" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Upload VCards</a>
+<a asp-action="Generate" asp-controller="Home" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">Generate QR Codes</a>

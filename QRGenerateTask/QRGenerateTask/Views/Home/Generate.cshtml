@@ -1,9 +1,27 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Generate";
 }
 @model List<VCard>
+<div class="row ">
 @foreach (var item in Model)
 {
-    <img src="@item.ExistQRPath"/>
+  <div class="col-3 px-1 my-1">
+  <div class="card" style="width: 17rem;">
+  <img class="card-img-top" src="@item.ExistQRPath" alt="@item.Firstname">
+  <div class="card-body">
+    <h5 class="card-title">@item.Firstname @item.Lastname</h5>
+    <p class="card-text">
+        @item.Email
+    </p>
+     <p class="card-text">
+         @item.Phone
+    </p>
+     <p class="card-text">
+         @item.Country, @item.City
+    </p>
+  </div>
+</div>
+  </div>
 }
+</div>
 
